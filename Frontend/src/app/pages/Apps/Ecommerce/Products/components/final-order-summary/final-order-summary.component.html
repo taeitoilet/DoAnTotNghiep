@@ -1,0 +1,49 @@
+<ng-container *ngFor="let product of addToCartProduct;let first=first">
+    <div>
+        <div class="mb-3">
+            <button class="float-end" (click)="removeProductDetail(product.pId)">
+                <i class="link size-4 link-red ri-close-line"></i>
+            </button>
+            <div class="flex flex-col gap-3 md:flex-row">
+                <div class="flex items-center justify-center w-16 bg-gray-100 rounded-md dark:bg-dark-850">
+                    <img [src]="product.image" (error)="onImageError($event)">
+                </div>
+                <div>
+                    <h6 class="mb-1">{{product.productName}}</h6>
+                    <p class="mb-2 text-gray-500 dark:text-dark-500">
+                        <span class="px-2 border-r border-gray-200 dark:border-dark-800 first:pl-0">Số lượng: {{product.qty}} </span>
+                        <span class="px-2 border-r border-gray-200 dark:border-dark-800 first:pl-0">{{product.selectedColor}}</span>
+                        <span class="px-2 ltr:first:pl-0 rtl:first:pr-0">{{product.selectedSize}}</span>
+                    </p>
+                    <h5>{{product.displayedPrice | number : '1.0'}}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
+<div class="mb-4">
+    <label for="discountCode" class="form-label">Mã giảm giá</label>
+    <input type="text" id="discountCode" class="form-input" placeholder="Nhập mã giảm giá">
+</div>
+<table class="table flush">
+    <tr>
+        <th class="!border-0">Số tiền</th>
+        <td><span>{{summary.subtotal | number: '1.0'}}đ</span></td>
+    </tr>
+    <tr>
+        <th class="!border-0">Phí VAT (6%)</th>
+        <td><span>{{summary.vat| number: '1.0'}}đ</span></td>
+    </tr>
+    <tr>
+        <th class="!border-0">Giảm giá </th>
+        <td>-<span>{{summary.discount| number: '1.0'}}đ</span></td>
+    </tr>
+    <tr>
+        <th class="!border-0">Phí ship</th>
+        <td><span>{{summary.shippingCharge| number: '1.0'}}đ</span></td>
+    </tr>
+    <tr class="border-t border-gray-200 dark:border-dark-800">
+        <th class="!border-0">Tổng cộng</th>
+        <td><span>{{summary.total| number: '1.0'}}đ</span></td>
+    </tr>
+</table>

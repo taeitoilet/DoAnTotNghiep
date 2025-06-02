@@ -1,0 +1,282 @@
+package org.example.foodee_service.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.foodee_service.dto.request.role_request.RoleCreateRequest;
+import org.example.foodee_service.dto.request.role_request.RolePagingQueryRequest;
+import org.example.foodee_service.dto.request.role_request.RoleQueryRequest;
+import org.example.foodee_service.dto.request.role_request.RoleUpdateRequest;
+import org.example.foodee_service.dto.response.permissionResponse.PermissionResponseDto;
+import org.example.foodee_service.dto.response.roleResponse.RoleResponseDto;
+import org.example.foodee_service.entity.Permission;
+import org.example.foodee_service.entity.Role;
+import org.example.foodee_service.exception.ResourceAlreadyExistsException;
+import org.example.foodee_service.exception.ResourceNotFoundException;
+import org.example.foodee_service.repository.PermissionRepository;
+import org.example.foodee_service.repository.RoleRepository;
+import org.example.foodee_service.service.RoleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.criteria.Predicate;
+import java.time.LocalDateTime;
+import java.util.*;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class RoleServiceImpl implements RoleService {
+
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
+
+    @Override
+    @Transactional
+    public RoleResponseDto createRole(RoleCreateRequest request) {
+        // Check if role already exists
+        if (roleRepository.existsByRoleName(request.getName())) {
+            throw new ResourceAlreadyExistsException("Role", "name", request.getName());
+        }
+
+        // Create new role entity
+        Role role = Role.builder()
+                .roleName(request.getName())
+                .roleDescription(request.getDescription())
+                .roleCreatedAt(LocalDateTime.now())
+                .roleCreatedBy("system") // In a real application, this would be from authenticated user
+                .roleUpdatedAt(LocalDateTime.now())
+                .roleUpdatedBy("system") // In a real application, this would be from authenticated user
+                .permissions(new HashSet<>())
+                .build();
+        
+        // Add permissions if requested
+        if (request.getPermissionNames() != null && !request.getPermissionNames().isEmpty()) {
+            request.getPermissionNames().forEach(permName -> {
+                Permission permission = permissionRepository.findByPermName(permName)
+                        .orElseThrow(() -> new ResourceNotFoundException("Permission", "name", permName));
+                role.getPermissions().add(permission);
+            });
+//            Set<Permission> permissions = fetchPermissionsByNames(request.getPermissionNames());
+//            role.setPermissions(permissions);
+        }
+
+        log.info("Role created: {}", role);
+
+        // Save role to database
+        Role savedRole = roleRepository.save(role);
+
+        // Return response DTO
+        return mapToResponseDto(savedRole);
+    }
+
+    @Override
+    public RoleResponseDto getRoleByName(String name) {
+        log.info("Looking for role: {}", name);
+        Role role = roleRepository.getByRoleName(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Role", "name", name));
+
+        return mapToResponseDto(role);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RoleResponseDto> getRolesPaging(RolePagingQueryRequest request, long[] total) {
+        // Create specification based on filters
+        Specification<Role> spec = createSpecification(request);
+        
+        // Create pageable object from request
+        Pageable pageable = PageRequest.of(
+                request.getPage().getPageNum() - 1,
+                request.getPage().getPageSize()
+        );
+
+        // Use specification for filtering
+        Page<Role> rolesPage;
+        if (spec != null) {
+            rolesPage = roleRepository.findAll(spec, pageable);
+        } else {
+            rolesPage = roleRepository.findAll(pageable);
+        }
+
+        // Set total count if requested
+        if (Boolean.TRUE.equals(request.getPage().getGetTotal())) {
+            total[0] = rolesPage.getTotalElements();
+        }
+
+        // Biến đổi thành DTO với xử lý cẩn thận cho collection
+        List<RoleResponseDto> roleDtos = new ArrayList<>();
+        for (Role role : rolesPage.getContent()) {
+            roleDtos.add(mapToResponseDto(role));
+        }
+        
+        return roleDtos;
+    }
+
+    @Override
+    @Transactional
+    public RoleResponseDto updateRole(String name, RoleUpdateRequest request) {
+        // Check if role exists
+        Role role = roleRepository.getByRoleName(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Role", "name", name));
+
+        // Update description if provided
+        if (request.getDescription() != null) {
+            role.setRoleDescription(request.getDescription());
+        }
+        
+        // Update permissions based on the operation type
+        if (request.getPermissionNames() != null && !request.getPermissionNames().isEmpty()) {
+            Set<Permission> requestedPermissions = fetchPermissionsByNames(request.getPermissionNames());
+            
+            switch (request.getPermissionOperation()) {
+                case ADD:
+                    // Add new permissions to existing ones
+                    role.getPermissions().addAll(requestedPermissions);
+                    break;
+                    
+                case REMOVE:
+                    // Remove specified permissions
+                    role.getPermissions().removeAll(requestedPermissions);
+                    break;
+                    
+                case REPLACE:
+                default:
+                    // Replace all permissions
+                    role.setPermissions(requestedPermissions);
+                    break;
+            }
+        } else if (request.getPermissionOperation() == RoleUpdateRequest.PermissionOperation.REPLACE) {
+            // Clear all permissions if empty list is provided with REPLACE operation
+            role.setPermissions(new HashSet<>());
+        }
+        
+        role.setRoleUpdatedAt(LocalDateTime.now());
+        role.setRoleUpdatedBy("system"); // In a real application, this would be from authenticated user
+
+        // Save updated role
+        Role updatedRole = roleRepository.save(role);
+
+        // Return response DTO
+        return mapToResponseDto(updatedRole);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRole(String name) {
+        // Check if role exists
+        Role role = roleRepository.getByRoleName(name)
+                .orElseThrow(() -> new ResourceNotFoundException("Role", "name", name));
+        // Delete role
+        roleRepository.delete(role);
+    }
+
+    @Override
+    @Transactional
+    public List<RoleResponseDto> getRoles(RoleQueryRequest request) {
+        // Create specification based on filters
+        Specification<Role> spec = createSpecification(request);
+        
+        // Use specification for filtering
+        List<Role> roles;
+        if (spec != null) {
+            roles = roleRepository.findAll(spec);
+        } else {
+            roles = roleRepository.findAll();
+        }
+
+        // Biến đổi thành DTO với xử lý cẩn thận cho collection
+        List<RoleResponseDto> roleDtos = new ArrayList<>();
+        for (Role role : roles) {
+            roleDtos.add(mapToResponseDto(role));
+        }
+        
+        return roleDtos;
+    }
+
+    // Helper method to map Role entity to RoleResponseDto
+    private RoleResponseDto mapToResponseDto(Role role) {
+        // Tạo DTO cơ bản không bao gồm permissions
+        RoleResponseDto dto = RoleResponseDto.builder()
+                .name(role.getRoleName())
+                .description(role.getRoleDescription())
+                .createdAt(role.getRoleCreatedAt())
+                .createdBy(role.getRoleCreatedBy())
+                .updatedAt(role.getRoleUpdatedAt())
+                .updatedBy(role.getRoleUpdatedBy())
+                .build();
+        
+        // Chuyển đổi permissions nếu đã được tải
+        if (org.hibernate.Hibernate.isInitialized(role.getPermissions())) {
+            log.info("Role {} has {} permissions.", role.getRoleName(), role.getPermissions().size());
+            Set<PermissionResponseDto> permissionDtos = new HashSet<>();
+            for (Permission permission : role.getPermissions()) {
+                permissionDtos.add(mapPermissionToDto(permission));
+            }
+            dto.setPermissions(permissionDtos);
+        }
+        
+        return dto;
+    }
+
+    // Helper method to map Permission entity to PermissionResponseDto
+    private PermissionResponseDto mapPermissionToDto(Permission permission) {
+        return PermissionResponseDto.builder()
+                .name(permission.getPermName())
+                .description(permission.getPermDescription())
+                .createdAt(permission.getPermCreatedAt())
+                .createdBy(permission.getPermCreatedBy())
+                .updatedAt(permission.getPermUpdatedAt())
+                .updatedBy(permission.getPermUpdatedBy())
+                .build();
+    }
+    
+    private Set<Permission> fetchPermissionsByNames(Set<String> permissionNames) {
+        Set<Permission> permissions = new HashSet<>();
+        
+        for (String permName : permissionNames) {
+            Permission permission = permissionRepository.findByPermName(permName)
+                    .orElseThrow(() -> new ResourceNotFoundException("Permission", "name", permName));
+            permissions.add(permission);
+        }
+        
+        return permissions;
+    }
+    
+    private Specification<Role> createSpecification(RolePagingQueryRequest request) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            
+            // Add direct filter predicates if provided
+            if (request.getName() != null && !request.getName().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + request.getName().toLowerCase() + "%"));
+            }
+            
+            if (request.getDescription() != null && !request.getDescription().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("description")), "%" + request.getDescription().toLowerCase() + "%"));
+            }
+            
+            return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private Specification<Role> createSpecification(RoleQueryRequest request) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            
+            // Add direct filter predicates if provided
+            if (request.getName() != null && !request.getName().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + request.getName().toLowerCase() + "%"));
+            }
+            
+            if (request.getDescription() != null && !request.getDescription().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("description")), "%" + request.getDescription().toLowerCase() + "%"));
+            }
+            
+            return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+} 

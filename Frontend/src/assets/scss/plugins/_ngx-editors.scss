@@ -1,0 +1,22 @@
+.ngx-editors {
+  --ngx-editor-background-color: theme('colors.white');
+  --ngx-editor-popup-bg-color: theme('colors.white');
+  --ngx-editor-text-color: theme('colors.gray.800');
+  --ngx-editor-border-color: theme('colors.gray.200');
+  --ngx-editor-seperator-color: theme('colors.gray.200');
+  --ngx-editor-menu-item-hover-bg-color: theme('colors.gray.100');
+  --ngx-editor-menu-item-active-bg-color: theme('colors.gray.100');
+}
+
+[data-mode="dark"] {
+  .ngx-editors {
+    --ngx-editor-background-color: var(--colors-dark-900);
+    --ngx-editor-popup-bg-color: var(--colors-dark-850);
+    --ngx-editor-menubar-bg-color: var(--colors-dark-900);
+    --ngx-editor-text-color: var(--colors-dark-100);
+    --ngx-editor-border-color: var(--colors-dark-800);
+    --ngx-editor-seperator-color: var(--colors-dark-800);
+    --ngx-editor-menu-item-hover-bg-color: var(--colors-dark-850);
+    --ngx-editor-menu-item-active-bg-color: var(--colors-dark-850);
+  }
+}

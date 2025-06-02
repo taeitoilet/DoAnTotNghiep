@@ -1,0 +1,4 @@
+package org.example.foodee_service.mapper;
+
+public class CategoryMapper {
+}

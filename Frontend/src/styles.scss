@@ -1,0 +1,39 @@
+/* You can add global styles to this file, and also import other style files */
+.filter-ng-select {
+  min-width: 155px;
+}
+
+.dropdown-menu {
+  @apply hidden;
+
+  &.show {
+    @apply block;
+  }
+}
+
+.jvm-container {
+  path {
+    @apply fill-gray-100 dark:fill-dark-700;
+  }
+}
+
+.ngx-slider .ngx-slider-pointer:after {
+  left: -0.25rem !important;
+}
+
+.card-view {
+  .card-view-col {
+    @apply 2xl:col-span-3 md:col-span-6 col-span-12;
+  }
+  .card-view-wrap {
+    @apply grid-cols-12 grid;
+
+    .card-view-col-12 {
+      @apply col-span-12;
+    }
+
+    .card-view-hidden {
+      @apply hidden;
+    }
+  }
+}

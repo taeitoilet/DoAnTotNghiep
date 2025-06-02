@@ -1,0 +1,373 @@
+<app-page-title [pageTitle]="'Quản lý nhà hàng'" [Title]="'Món ăn'"></app-page-title>
+
+<div class="flex flex-wrap items-center gap-5 mb-5">
+  <div class="grow">
+    <h6 class="mb-1 card-title">{{productId ? 'Sửa món' : 'Thêm món' }}</h6>
+  </div>
+  <div class="flex gap-2 shrink-0">
+    <button class="btn btn-sub-gray" (click)="showConfirm = true" *ngIf="productId">
+      <lucide-angular name="trash2" class="inline-block ltr:mr-1 rtl:ml-1 align-center size-4"></lucide-angular>
+      <span class="align-middle">Xóa</span>
+    </button>
+    <!-- Modal -->
+    <div *ngIf="showConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+      <div class="bg-white p-6 rounded shadow-md w-full max-w-md text-center">
+        <h2 class="text-lg font-semibold mb-4">Bạn có chắc chắn muốn xóa?</h2>
+        <p class="text-gray-600 mb-6">Hành động này không thể hoàn tác.</p>
+        <div class="flex justify-center gap-4">
+          <button class="bg-red-500 text-white px-4 py-2 rounded" (click)="this.onDelete()">Xác nhận</button>
+          <button class="bg-gray-300 px-4 py-2 rounded" (click)="showConfirm = false">Hủy</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed" [disabled]="!this.formGroup.valid || !this.formGroup.dirty" (click)="addOrEdit()">
+      <lucide-angular [name]="productId ? 'pencil' : 'plus'" class="inline-block ltr:mr-1 rtl:ml-1 align-center size-4">
+      </lucide-angular>
+      <span class="align-middle">{{productId ? 'Sửa món' : 'Thêm món' }}</span>
+    </button>
+  </div>
+</div>
+
+<div class="grid grid-cols-12 gap-5" [formGroup]="formGroup">
+  <div class="col-span-12 xl:col-span-8">
+    <div class="card">
+      <div class="card-header">
+        <div class="flex items-center justify-between">
+          <h6 class="card-title">Thông tin cơ bản</h6>
+          <div class="flex items-center">
+            <label for="statusInput" class="form-label mb-0 ltr:mr-2 rtl:ml-2 text-right">Trạng thái (Ẩn/Hiện)</label>
+            <label class="switch-group switch-soft">
+              <div class="relative">
+                <input type="checkbox" class="sr-only peer" formControlName="status" [checked]="formGroup.get('status')?.value === 'ACTIVE'" />
+                <div class="switch-wrapper peer-checked:!bg-purple-500/15"></div>
+                <div
+                  class="switch-dot peer-checked:translate-x-full rtl:peer-checked:-translate-x-full peer-checked:!bg-purple-500">
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="grid grid-cols-12 gap-5">
+            <div class="col-span-12">
+              <label for="productNameInput" class="form-label">Tên món</label>
+              <input type="text" id="productNameInput" class="form-input" placeholder="Thông tin bắt buộc"
+                     formControlName="productName">
+              <span *ngIf="formGroup.get('productName')?.hasError('required')" class="text-red-500">Vui lòng nhập đầy đủ!</span>
+              <span *ngIf="formGroup.get('productName')?.hasError('minlength') || formGroup.get('productName')?.hasError('maxlength')" class="text-red-500">Vui lòng nhập từ 3 - 80 ký tự!</span>
+            </div>
+            <div class="col-span-12">
+              <label for="descriptionTextarea" class="form-label">Mô tả</label>
+              <textarea name="descriptionTextarea" id="descriptionTextarea" rows="3" class="h-auto form-input"
+                        placeholder="Thông tin bắt buộc" formControlName="description" ></textarea>
+              <span *ngIf="formGroup.get('description')?.hasError('required')" class="text-red-500">Vui lòng nhập đầy đủ!</span>
+              <span *ngIf="formGroup.get('description')?.hasError('minlength') || formGroup.get('description')?.hasError('maxlength')" class="text-red-500">Vui lòng nhập từ 3 - 255 ký tự!</span>
+            </div>
+            <div class="col-span-4">
+              <label for="categorySelect" class="form-label">Phân loại</label>
+              <ng-select class="filter-ng-select" [items]="categories" bindLabel="dishTypeName" bindValue="dishTypeId"
+                         placeholder="Chọn một phân loại" formControlName="category">
+              </ng-select>
+              <span *ngIf="formGroup.get('category')?.hasError('required')" class="text-red-500"> Vui lòng nhập đầy đủ!</span>
+            </div>
+            <!--            <div class="col-span-4">-->
+            <!--              <label for="brandTypeSelect" class="form-label">Brand Type</label>-->
+            <!--              <ng-select class="filter-ng-select" [items]="brandOption" bindLabel="label" bindValue="value"-->
+            <!--                         placeholder="Select a brand" formControlName="brand">-->
+            <!--              </ng-select>-->
+            <!--              <span *ngIf="formGroup.get('brand')?.hasError('required')" class="text-red-500"> Vui lòng nhập đầy đủ!</span>-->
+            <!--            </div>-->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--end card-->
+    <div class="card">
+      <div class="card-header">
+        <h6 class="card-title">Hình ảnh</h6>
+      </div>
+      <div class="card-body">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-12 md:col-span-12 md:row-span-3">
+            <div class="h-full">
+              <label for="logo1"
+                     class="flex items-center justify-center h-full p-5 text-center border border-gray-200 border-dashed cursor-pointer dark:border-dark-800">
+                <img *ngIf="formGroup.get('image')?.value" [src]="formGroup.get('image')?.value" class="mx-auto h-60">
+                <div class="text-gray-500 dark:text-dark-500" *ngIf="!formGroup.get('image')?.value">
+                  <lucide-angular name="imagePlus" class="mx-auto"></lucide-angular>
+                  <div class="mt-3">Hình ảnh món ăn</div>
+                  <span *ngIf="formGroup.get('image')?.hasError('required')" class="text-red-500"> Vui lòng nhập đầy đủ!</span>
+                </div>
+              </label>
+              <div class="hidden mt-4">
+                <input (change)="onFileSelected($event, 'image')" type="file" name="logo1" id="logo1"
+                       class="block w-full text-sm file:rounded-md focus:outline-0 text-slate-500 dark:text-dark-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 " />
+              </div>
+            </div>
+          </div>
+
+          <!--          <div class="col-span-12 md:col-span-5">-->
+          <!--            <div>-->
+          <!--              <label for="logo2"-->
+          <!--                     class="flex items-center justify-center h-56 p-5 text-center border border-gray-200 border-dashed cursor-pointer dark:border-dark-800">-->
+          <!--                <img *ngIf="formGroup.get('image1')?.value" [src]="formGroup.get('image1')?.value" class="mx-auto h-44">-->
+          <!--                <div *ngIf="!formGroup.get('image1')?.value" class="text-gray-500 dark:text-dark-500">-->
+          <!--                  <lucide-angular name="imagePlus" class="mx-auto"></lucide-angular>-->
+          <!--                  <div class="mt-3">Product Image 2</div>-->
+          <!--                  <span *ngIf="formGroup.get('image1')?.hasError('required')" class="text-red-500"> This Filed is-->
+          <!--                    Required</span>-->
+          <!--                </div>-->
+          <!--              </label>-->
+          <!--              <div class="hidden mt-4">-->
+          <!--                <input (change)="onFileSelected($event, 'image1')" type="file" name="logo2" id="logo2"-->
+          <!--                       class="block w-full text-sm file:rounded-md focus:outline-0 text-slate-500 dark:text-dark-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 " />-->
+          <!--              </div>-->
+          <!--            </div>-->
+          <!--          </div>-->
+          <!--          <div class="col-span-12 md:col-span-5">-->
+          <!--            <div>-->
+          <!--              <label for="logo3"-->
+          <!--                     class="flex items-center justify-center h-56 p-5 text-center border border-gray-200 border-dashed cursor-pointer dark:border-dark-800">-->
+          <!--                <img *ngIf="formGroup.get('image2')?.value" [src]="formGroup.get('image2')?.value" class="mx-auto h-44">-->
+          <!--                <div *ngIf="!formGroup.get('image2')?.value" class="text-gray-500 dark:text-dark-500">-->
+          <!--                  <lucide-angular name="imagePlus" class="mx-auto"></lucide-angular>-->
+          <!--                  <div class="mt-3">Product Image 3</div>-->
+          <!--                  <span *ngIf="formGroup.get('image2')?.hasError('required')" class="text-red-500"> This Filed is-->
+          <!--                    Required</span>-->
+          <!--                </div>-->
+          <!--              </label>-->
+          <!--              <div class="hidden mt-4">-->
+          <!--                <input (change)="onFileSelected($event, 'image2')" type="file" name="logo3" id="logo3"-->
+          <!--                       class="block w-full text-sm file:rounded-md focus:outline-0 text-slate-500 dark:text-dark-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 " />-->
+          <!--              </div>-->
+          <!--            </div>-->
+          <!--          </div>-->
+        </div>
+      </div>
+    </div>
+    <!--end card-->
+    <!--    <div class="card">-->
+    <!--      <div class="card-header">-->
+    <!--        <h6 class="card-title">Advance Description</h6>-->
+    <!--      </div>-->
+    <!--      <div class="card-body">-->
+    <!--        <div class="grid grid-cols-12 gap-5">-->
+    <!--          <div class="col-span-12 md:col-span-4">-->
+    <!--            <h6 class="form-label">Select Gender</h6>-->
+    <!--            <div class="flex items-center gap-3">-->
+    <!--              <div class="input-radio-group">-->
+    <!--                <input id="maleRadio" class="input-radio input-radio-primary" type="radio" value="male"-->
+    <!--                       formControlName="gender" />-->
+    <!--                <label for="maleRadio" class="input-radio-label">Male</label>-->
+    <!--              </div>-->
+    <!--              <div class="input-radio-group">-->
+    <!--                <input id="femaleRadio" class="input-radio input-radio-primary" type="radio" value="female"-->
+    <!--                       formControlName="gender" />-->
+    <!--                <label for="femaleRadio" class="input-radio-label">Female</label>-->
+    <!--              </div>-->
+    <!--              <div class="input-radio-group">-->
+    <!--                <input id="unisexRadio" class="input-radio input-radio-primary" type="radio" value="unisex"-->
+    <!--                       formControlName="gender" />-->
+    <!--                <label for="unisexRadio" class="input-radio-label">Unisex</label>-->
+    <!--              </div>-->
+
+    <!--            </div>-->
+    <!--            <span *ngIf="formGroup.get('gender')?.hasError('required')" class="text-red-500"> Vui lòng nhập đầy đủ!</span>-->
+    <!--          </div>-->
+    <!--          <div class="col-span-12 md:col-span-4">-->
+    <!--            <label for="stockInput" class="form-label">Stock</label>-->
+    <!--            <div>-->
+    <!--              <div class="flex input-spin-group input-spin-primary">-->
+    <!--                <button class="input-spin-minus" [disabled]="formGroup.get('stock')?.value === 1"-->
+    <!--                        (click)="minusData('stock')">-->
+    <!--                  <lucide-angular class="size-4" name="minus"></lucide-angular>-->
+    <!--                </button>-->
+    <!--                <input type="text" class="input-spin form-input" readonly id="stockInput" formControlName="stock">-->
+    <!--                <span *ngIf="formGroup.get('stock')?.hasError('required')" class="text-red-500"> This Filed is-->
+    <!--                  Required</span>-->
+    <!--                <button class="input-spin-plus" (click)="plusData('stock')">-->
+    <!--                  <lucide-angular name="plus" class="size-4"></lucide-angular>-->
+    <!--                </button>-->
+    <!--              </div>-->
+    <!--            </div>-->
+    <!--          </div>-->
+    <!--          <div class="col-span-12 md:col-span-4">-->
+    <!--            <label for="quantityInput" class="form-label">Quantity</label>-->
+    <!--            <div>-->
+    <!--              <div class="flex input-spin-group input-spin-primary">-->
+    <!--                <button class="input-spin-minus" [disabled]="formGroup.get('qty')?.value === 1"-->
+    <!--                        (click)="minusData('qty')">-->
+    <!--                  <lucide-angular class="size-4" name="minus"></lucide-angular>-->
+    <!--                </button>-->
+    <!--                <input type="text" class="input-spin form-input" readonly id="quantityInput" formControlName="qty">-->
+    <!--                <span *ngIf="formGroup.get('qty')?.hasError('required')" class="text-red-500"> This Filed is-->
+    <!--                  Required</span>-->
+    <!--                <button class="input-spin-plus" (click)="plusData('qty')">-->
+    <!--                  <lucide-angular name="plus" class="size-4"></lucide-angular>-->
+    <!--                </button>-->
+    <!--              </div>-->
+    <!--            </div>-->
+    <!--          </div>-->
+    <!--          <div class="col-span-12 md:col-span-6">-->
+    <!--            <label for="sizeSelect" class="form-label">Size</label>-->
+    <!--            <ng-select [items]="sizeOptions" bindLabel="label" bindValue="value" formControlName="size"-->
+    <!--                       [multiple]="true" placeholder="Select sizes" (change)="onSelectionChange()">-->
+    <!--            </ng-select>-->
+    <!--            <span *ngIf="formGroup.get('size')?.hasError('required')" class="text-red-500"> This Filed is-->
+    <!--              Required</span>-->
+    <!--          </div>-->
+    <!--          <div class="col-span-12 md:col-span-6">-->
+    <!--            <label for="sizeSelect" class="form-label">Colors</label>-->
+    <!--            <ng-select [items]="colorOptions" bindLabel="label" bindValue="value" formControlName="colores"-->
+    <!--                       [multiple]="true" placeholder="Select sizes" (change)="onSelectionChange()">-->
+    <!--            </ng-select>-->
+    <!--            <span *ngIf="formGroup.get('colores')?.hasError('required')" class="text-red-500"> This Filed is-->
+    <!--              Required</span>-->
+    <!--          </div>-->
+    <!--        </div>-->
+    <!--      </div>-->
+    <!--    </div>-->
+    <!--end card-->
+    <div class="card">
+      <div class="card-header">
+        <h6 class="card-title">Thông tin bán hàng</h6>
+      </div>
+      <div class="card-body">
+        <div class="grid grid-cols-12 gap-5">
+          <div class="col-span-12 md:col-span-3">
+            <label for="priceInput" class="form-label">Giá gốc</label>
+            <input type="text" id="priceInput" class="form-input" placeholder="VND" formControlName="price">
+            <span *ngIf="formGroup.get('price')?.hasError('required')" class="text-red-500"> Vui lòng nhập đầy đủ!</span>
+          </div>
+          <div class="col-span-12 md:col-span-3">
+            <label for="discountInput" class="form-label">Phần trăm lợi nhuận</label>
+            <input type="number" id="discountInput" class="form-input" placeholder="0%" formControlName="discount" min=10>
+            <span *ngIf="formGroup.get('discount')?.hasError('required')" class="text-red-500"> Vui lòng nhập đầy đủ!</span>
+
+            <span *ngIf="formGroup.get('discount')?.hasError('min') || formGroup.get('discount')?.hasError('max')" class="text-red-500"> Tỉ lệ lợi nhuận phải từ 5% đến 100%!</span>
+          </div>
+          <div class="col-span-12 md:col-span-3">
+            <label for="sellingPrice" class="form-label">Giá bán thực tế</label>
+            <input type="text" id="sellingPrice" class="form-input" placeholder="VNĐ" x-model="sellingPrice"
+                   formControlName="sellingPrice">
+            <span *ngIf="formGroup.get('sellingPrice')?.hasError('required')" class="text-red-500"> Vui lòng nhập đầy đủ!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--end card-->
+
+    <!--    <div class="card">-->
+    <!--      <div class="card-header">-->
+    <!--        <h6 class="card-title">Phương thức thanh toán</h6>-->
+    <!--      </div>-->
+    <!--      <div class="card-body">-->
+    <!--        <div class="grid grid-cols-12 gap-5">-->
+    <!--          <div class="col-span-12 md:col-span-4">-->
+    <!--            <label for="cashOnDelivery" class="relative block mb-0 cursor-pointer card">-->
+    <!--              <span class="flex items-center gap-3 card-body">-->
+    <!--                <img src="assets/images/others/money.png" alt="" class="size-8 shrink-0">-->
+    <!--                <span class="block text-base font-semibold grow">Nhận hàng trả tiền</span>-->
+    <!--                <input id="cashOnDelivery" class="input-check input-check-primary shrink-0" type="checkbox"-->
+    <!--                       formControlName="cashOnDelivery" />-->
+    <!--              </span>-->
+    <!--            </label>-->
+    <!--          </div>-->
+    <!--          <div class="col-span-12 md:col-span-4">-->
+    <!--            <label for="masterVisaCard" class="relative block mb-0 cursor-pointer card">-->
+    <!--              <span class="flex items-center gap-3 card-body">-->
+    <!--                <img src="assets/images/payment/mastercard.png" alt="" class="h-8 shrink-0">-->
+    <!--                <span class="block text-base font-semibold grow">Visa & Master Card</span>-->
+    <!--                <input id="masterVisaCard" class="input-check input-check-primary shrink-0" type="checkbox"-->
+    <!--                       formControlName="visaAndMaster" />-->
+    <!--              </span>-->
+    <!--            </label>-->
+    <!--          </div>-->
+    <!--          <div class="col-span-12 md:col-span-4">-->
+    <!--            <label for="bankCard" class="relative block mb-0 cursor-pointer card">-->
+    <!--              <span class="flex items-center gap-3 card-body">-->
+    <!--                <img src="assets/images/others/bank.png" alt="" class="h-8 shrink-0">-->
+    <!--                <span class="block text-base font-semibold grow">Chuyển khoản ngân hàng</span>-->
+    <!--                <input id="bankCard" class="input-check input-check-primary shrink-0" type="checkbox"-->
+    <!--                       formControlName="bankTransfer" />-->
+    <!--              </span>-->
+    <!--            </label>-->
+    <!--          </div>-->
+    <!--        </div>-->
+    <!--      </div>-->
+    <!--    </div>-->
+    <!--end card-->
+  </div>
+
+  <div class="col-span-12 xl:col-span-4">
+    <div class="sticky top-24 card">
+      <div class="card-header">
+        <h6 class="card-title">
+          <lucide-angular name="Eye" class="inline-block mr-1 size-4"></lucide-angular> <span
+          class="align-middle">Xem trước</span>
+        </h6>
+      </div>
+      <div class="bg-gray-100 card-body dark:bg-dark-850">
+        <div class="mb-0 card">
+          <div class="card-body">
+            <div class="relative p-5 bg-gray-100 dark:bg-dark-850">
+              <a href="javascript: void(0);"
+                 class="absolute z-10 flex items-center justify-center bg-white rounded-full link link-red size-10 shrink-0 top-5 dark:bg-dark-850 ltr:right-5 rtl:left-5"><i
+                class="text-lg ri-heart-line"></i></a>
+              <div class="swiper-slide">
+                <img [src]="formGroup.get('image')?.value" alt="" class="w-3/4 mx-auto">
+              </div>
+              <!--              <div class="swiper productSlider" #paginationDynamicSlider>-->
+              <!--                <div class="swiper-wrapper">-->
+              <!--                  <div class="swiper-slide">-->
+              <!--                    <img src="assets/images/products/img-06.png" alt="" class="w-3/4 mx-auto">-->
+              <!--                  </div>-->
+              <!--                  <div class="swiper-slide">-->
+              <!--                    <img src="assets/images/products/img-04.png" alt="" class="w-3/4 mx-auto">-->
+              <!--                  </div>-->
+              <!--                  <div class="swiper-slide">-->
+              <!--                    <img src="assets/images/products/img-05.png" alt="" class="w-3/4 mx-auto">-->
+              <!--                  </div>-->
+              <!--                </div>-->
+              <!--                <div class="swiper-pagination"></div>-->
+              <!--              </div>-->
+            </div>
+            <div class="mt-5">
+              <h5>{{formGroup.get('productName')?.value}}</h5>
+              <p class="text-base" class="mb-2">{{ formGroup.get('sellingPrice')?.value * 1 | number:'1.0-0' }} VNĐ</p>
+              <h6 class="mb-1"><a href="javascript: void(0);" class="text-current link link-primary">{{formGroup.get('name')?.value}}</a></h6>
+
+              <p class="text-gray-500 dark:text-dark-500">{{formGroup.get('description')?.value}}</p>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <!--                <div class="flex items-center gap-2 mt-3 grow">-->
+                <!--                  <a href="javascript: void(0);"-->
+                <!--                     class="flex items-center justify-center text-white bg-{{data.label}}-500 rounded size-5 group/item"-->
+                <!--                     [ngClass]="{'active': data.label === currantColor}" *ngFor="let data of colorOptions" (click)="currantColor = data.label">-->
+                <!--                    <lucide-angular name="Check" class="size-4 hidden group-[&.active]/item:block"></lucide-angular>-->
+                <!--                  </a>-->
+                <!--                </div>-->
+
+                <!--                <div class="flex items-center gap-2 mt-3 font-medium shrink-0">-->
+                <!--                  <a href="javascript: void(0);" class="text-gray-500 dark:text-dark-500 [&.active]:text-green-500"-->
+                <!--                     *ngFor="let data of sizeOptions" [ngClass]="{'active': data.label === currantSize}"-->
+                <!--                     (click)="currantSize =  data.label">{{data.label}}</a>-->
+                <!--                </div>-->
+              </div>
+
+              <div class="flex gap-2 mt-4">
+                <button type="button" class="w-full btn btn-primary">Đặt ngay</button>
+                <a href="javascript: void(0);" class="btn btn-sub-gray btn-icon shrink-0">
+                  <lucide-angular name="ShoppingBasket" class="size-5"></lucide-angular>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--end col-->
+</div>

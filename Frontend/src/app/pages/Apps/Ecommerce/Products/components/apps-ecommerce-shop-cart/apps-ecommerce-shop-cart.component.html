@@ -1,0 +1,128 @@
+<app-page-title [pageTitle]="'Ecommerce'" [Title]="'Giỏ hàng'"></app-page-title>
+
+<div class="grid grid-cols-12 gap-5">
+  <div class="col-span-12 xl:col-span-8">
+<!--    <div class="flex items-center gap-5 mb-5">-->
+<!--      <h6 class="card-title grow">Shopping Cart</h6>-->
+<!--      <div class="flex items-center justify-center shrink-0">-->
+<!--        <p class="text-gray-500 dark:text-dark-500 shrink-0">-->
+<!--          <span class="font-semibold text-red-500">-->
+<!--            {{ _minutes }}:{{ _seconds}}-->
+<!--          </span>-->
+<!--          left until the end of the process-->
+<!--        </p>-->
+<!--      </div>-->
+<!--    </div>-->
+
+    <ng-container *ngFor="let product of formArray.controls;let i = index;">
+      <div [formGroup]="product">
+        <div class="card">
+          <div class="card-body">
+            <button class="float-end" (click)="removeProductDetail(product.get('pId')?.value ,i)">
+              <i class="link size-4 link-red ri-close-line"></i>
+            </button>
+            <div class="gap-5 sm:flex">
+              <div class="w-full sm:w-[200px] flex-shrink-0 bg-gray-100 dark:bg-dark-850 rounded-md">
+                <img class="dishImg" [src]="product.get('image')?.value" alt="" (error)="onImageError($event)">
+              </div>
+              <div class="mt-5 sm:mt-0">
+                <span class="badge badge-gray">{{product.get('category')?.value}}</span>
+                <h6 class="mt-2 mb-3"><a href="javascript: void(0);">{{product.get('productName')?.value}}</a>
+                </h6>
+                <h5 class="flex items-center gap-2 mt-4">
+                  <span>
+                    {{product.get('displayedPrice')?.value}}đ
+                  </span>
+                </h5>
+
+                <div class="mt-5">
+                  <div class="flex items-center w-32 p-1 text-center border border-gray-200 rounded-md dark:border-dark-800">
+                    <button class="flex items-center justify-center rounded-md text-primary-500 minus size-8" (click)="decrementCount(i)">
+                      <i class="size-4 ri-subtract-line"></i>
+                    </button>
+                    <input type="text" formControlName="qty" class="h-8 p-0 text-center border-0 form-input" readonly>
+                    <button class="flex items-center justify-center rounded-md text-primary-500 plus size-8" (click)="incrementCount(i)">
+                      <i class="size-4 ri-add-line"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="col-span-12 xl:col-span-4" *ngIf="summary">
+    <div class="sticky mb-5 top-24">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="card-title">Chi tiết</h6>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <label for="discountCode" class="form-label">Mã giảm giá</label>
+            <input type="text" id="discountCode" class="form-input" placeholder="Enter coupon code">
+          </div>
+          <table class="table flush">
+            <tr>
+              <th class="!border-0">Số tiền</th>
+              <td><span> {{summary.subtotal | number: '1.0'}}đ</span></td>
+            </tr>
+            <tr>
+              <th class="!border-0">VAT (6%)</th>
+              <td><span>{{summary.vat | number: '1.0'}}đ</span></td>
+            </tr>
+            <tr>
+              <th class="!border-0">Giảm giá</th>
+              <td>-<span>{{summary.discount | number: '1.0'}}đ</span></td>
+            </tr>
+            <tr>
+              <th class="!border-0">Phí ship</th>
+              <td><span>{{summary.shippingCharge | number: '1.0'}}đ</span></td>
+            </tr>
+            <tr class="border-t border-gray-200 dark:border-dark-800">
+              <th class="!border-0">Tổng tiền</th>
+              <td><span>{{summary.total | number: '1.0'}}đ</span></td>
+            </tr>
+          </table>
+          <div class="my-4">
+            <a [routerLink]="['/dashboard/apps-ecommerce-checkout']" class="w-full btn btn-primary">Thanh toán ngay</a>
+          </div>
+          <p class="text-center text-gray-500 dark:text-dark-500">Khi bạn ấn 'Thanh toán' là bạn đã đồng ý với các điều khoản của chúng tôi</p>
+        </div>
+      </div>
+      <div class="flex gap-4 mb-5">
+        <div class="flex items-center justify-center bg-gray-100 rounded-md size-12 dark:bg-dark-850 shrink-0">
+          <lucide-angular name="truck" class="text-gray-500 fill-gray-200 dark:text-dark-500 dark:fill-dark-850"></lucide-angular>
+        </div>
+        <div>
+          <h6 class="mb-1">Free delivery on May 24 </h6>
+          <p class="text-gray-500 dark:text-dark-500">To the address, by courier - with fitting, free of charge for
+            purchases over $500.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 mb-5">
+        <div class="flex items-center justify-center bg-gray-100 rounded-md size-12 dark:bg-dark-850 shrink-0">
+          <lucide-angular name="shield-check" class="text-gray-500 dark:text-dark-500 fill-gray-200 dark:fill-dark-850"></lucide-angular>
+        </div>
+        <div>
+          <h6 class="mb-1">Safety</h6>
+          <p class="text-gray-500 dark:text-dark-500">The security of payments is guaranteed through the use of the SSL
+            protocol. Your bank card details are securely protected during online transactions.</p>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <div class="flex items-center justify-center bg-gray-100 rounded-md size-12 dark:bg-dark-850 shrink-0">
+          <lucide-angular name="percent" class="text-gray-500 dark:text-dark-500 fill-gray-200 dark:fill-dark-850"></lucide-angular>
+        </div>
+        <div>
+          <h6 class="mb-1">5% discount</h6>
+          <p class="text-gray-500 dark:text-dark-500">When paying online, you receive a 5% discount on your next
+            purchase.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

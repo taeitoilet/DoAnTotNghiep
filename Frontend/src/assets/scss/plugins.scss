@@ -1,0 +1,36 @@
+/*
+Template Name: Domiex - Admin & Dashboard Template
+Author: SRBThemes
+Version: 1.0.0
+File: plugins scss files
+*/
+
+@use 'plugins/ngx-editors';
+
+.pagination-icon-pre {
+    .lucide-ChevronLeft {
+        @apply mr-1 ltr:inline-block rtl:hidden size-4;
+    }
+
+    .lucide-ChevronRight {
+        @apply ml-1 rtl:inline-block ltr:hidden size-4;
+    }
+}
+
+.pagination-icon-next {
+    .lucide-ChevronRight {
+        @apply ml-1 ltr:inline-block rtl:hidden size-4;
+    }
+
+    .lucide-ChevronLeft {
+        @apply mr-1 rtl:inline-block ltr:hidden size-4;
+    }
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    background-color: transparent !important;
+}

@@ -1,0 +1,51 @@
+.hero-section {
+  .search-bar {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    input {
+      &::placeholder {
+        color: #9CA3AF;
+      }
+    }
+  }
+}
+
+.category-card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    
+    .icon-wrapper {
+      transform: scale(1.1);
+    }
+  }
+  
+  .icon-wrapper {
+    transition: transform 0.3s ease;
+  }
+}
+
+.restaurant-card, .promo-card {
+  transition: all 0.3s ease;
+  
+  img {
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover {
+    img {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.rating {
+  background-color: rgba(255, 193, 7, 0.1);
+  padding: 4px 8px;
+  border-radius: 16px;
+  
+  i {
+    font-size: 14px;
+  }
+} 

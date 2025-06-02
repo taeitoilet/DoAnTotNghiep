@@ -1,0 +1,92 @@
+package org.example.foodee_service.dto.response.common;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+public class ResultList<T> {
+    private int status = 0;
+    private String code = "0";
+    private String message = "Success";
+    private String traceId;
+    private List<ErrorDetail> errors = new ArrayList<>();
+    private ListData<T> data;
+    private LocalDateTime timestamp;
+    
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    public static class ListData<T> {
+        private List<T> items = new ArrayList<>();
+        
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private Long total;
+    }
+    
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    public static class ErrorDetail {
+        private String errorCode;
+        private String errorDesc;
+        private Object refVal;
+    }
+    
+    public static <T> ResultList<T> success(List<T> items, long total) {
+        ListData<T> listData = new ListData<>();
+        listData.setItems(items);
+        listData.setTotal(total);
+        
+        return ResultList.<T>builder()
+                .status(0)
+                .code("0")
+                .message("Success")
+                .data(listData)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+    
+    public static <T> ResultList<T> success(List<T> items) {
+        ListData<T> listData = new ListData<>();
+        listData.setItems(items);
+        
+        return ResultList.<T>builder()
+                .status(0)
+                .code("0")
+                .message("Success")
+                .data(listData)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+    
+    public static <T> ResultList<T> error(int status, String code, String message) {
+        return ResultList.<T>builder()
+                .status(status)
+                .code(code)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+    
+    public static <T> ResultList<T> error(int status, String code, String message, List<ErrorDetail> errors) {
+        return ResultList.<T>builder()
+                .status(status)
+                .code(code)
+                .message(message)
+                .errors(errors)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+} 

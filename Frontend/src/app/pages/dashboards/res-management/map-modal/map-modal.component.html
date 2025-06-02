@@ -1,0 +1,18 @@
+<h2>Chọn vị trí trên bản đồ</h2>
+
+<google-map
+  height="400px"
+  width="100%"
+  [center]="center"
+  [zoom]="zoom"
+  (mapClick)="mapClicked($event)">
+
+  <map-marker
+    [position]="markerPosition || { lat: 0, lng: 0 }">
+  </map-marker>
+
+</google-map>
+
+<div style="margin-top: 16px; text-align: right;">
+  <button (click)="onConfirm()">Xác nhận</button>
+</div>

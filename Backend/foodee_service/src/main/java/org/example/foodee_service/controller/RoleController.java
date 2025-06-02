@@ -1,0 +1,109 @@
+package org.example.foodee_service.controller;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import lombok.RequiredArgsConstructor;
+import org.example.foodee_service.dto.request.common.DetailQueryRequest;
+import org.example.foodee_service.dto.request.common.PagingQueryRequest;
+import org.example.foodee_service.dto.request.role_request.RoleCreateRequest;
+import org.example.foodee_service.dto.request.role_request.RolePagingQueryRequest;
+import org.example.foodee_service.dto.request.role_request.RoleQueryRequest;
+import org.example.foodee_service.dto.request.role_request.RoleUpdateRequest;
+import org.example.foodee_service.dto.response.roleResponse.RoleResponseDto;
+import org.example.foodee_service.dto.response.common.ResultList;
+import org.example.foodee_service.dto.response.common.ResultObject;
+import org.example.foodee_service.service.RoleService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/authorization/auth/role")
+@RequiredArgsConstructor
+@Validated
+public class RoleController {
+
+    private final RoleService roleService;
+
+    @PostMapping("/create/v1.0")
+    public ResponseEntity<ResultObject<RoleResponseDto>> createRole(
+            @Valid @RequestBody RoleCreateRequest request) {
+        RoleResponseDto createdRole = roleService.createRole(request);
+        ResultObject<RoleResponseDto> response = ResultObject.success(createdRole);
+        response.setTraceId(UUID.randomUUID().toString());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/detail/v1.0")
+    public ResponseEntity<ResultObject<RoleResponseDto>> getRoleDetail(
+            @RequestBody
+            @Valid
+            DetailQueryRequest name) {
+        RoleResponseDto role = roleService.getRoleByName(name.getId());
+        ResultObject<RoleResponseDto> response = ResultObject.success(role);
+        response.setTraceId(UUID.randomUUID().toString());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/list/v1.0")
+    public ResponseEntity<ResultList<RoleResponseDto>> getRoleList(
+            @Valid @RequestBody RolePagingQueryRequest request) {
+        // Check default values for paging
+        if (request.getPage() == null) {
+            PagingQueryRequest.Page defaultPage = new PagingQueryRequest.Page();
+            defaultPage.setPageNum(1);
+            defaultPage.setPageSize(10);
+            defaultPage.setGetTotal(true);
+            request.setPage(defaultPage);
+        }
+        
+        long[] total = new long[1];
+        List<RoleResponseDto> roles = roleService.getRolesPaging(request, total);
+        
+        ResultList<RoleResponseDto> response;
+        if (Boolean.TRUE.equals(request.getPage().getGetTotal())) {
+            response = ResultList.success(roles, total[0]);
+        } else {
+            response = ResultList.success(roles);
+        }
+        response.setTraceId(UUID.randomUUID().toString());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/query/v1.0")
+    public ResponseEntity<ResultList<RoleResponseDto>> queryRoles(
+            @Valid @RequestBody RoleQueryRequest request) {
+        
+        List<RoleResponseDto> roles = roleService.getRoles(request);
+        
+        ResultList<RoleResponseDto> response = ResultList.success(roles);
+        response.setTraceId(UUID.randomUUID().toString());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/update/v1.0")
+    public ResponseEntity<ResultObject<RoleResponseDto>> updateRole(
+            @RequestParam @NotBlank(message = "Role name cannot be blank") 
+            @Pattern(regexp = "^[A-Z_]+$", message = "Role name must contain only uppercase letters and underscores") 
+            String name,
+            @Valid @RequestBody RoleUpdateRequest request) {
+        RoleResponseDto updatedRole = roleService.updateRole(name, request);
+        ResultObject<RoleResponseDto> response = ResultObject.success(updatedRole);
+        response.setTraceId(UUID.randomUUID().toString());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/delete/v1.0")
+    public ResponseEntity<ResultObject<Void>> deleteRole(
+            @RequestBody
+            DetailQueryRequest request) {
+        roleService.deleteRole(request.getId());
+        ResultObject<Void> response = ResultObject.success(null);
+        response.setTraceId(UUID.randomUUID().toString());
+        return ResponseEntity.ok(response);
+    }
+} 

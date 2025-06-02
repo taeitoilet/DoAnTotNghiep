@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket & API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        #messages {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: scroll;
+        }
+        #sendMessage {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        #sendButton {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #sendButton:hover {
+            background-color: #45a049;
+        }
+        #apiButton {
+            padding: 10px 15px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        #apiButton:hover {
+            background-color: #006f8a;
+        }
+    </style>
+</head>
+<body>
+<h1>WebSocket & API Test</h1>
+
+<!-- Displaying messages received from WebSocket -->
+<div id="messages"></div>
+
+<!-- Input for WebSocket message -->
+<input type="text" id="sendMessage" placeholder="Type a message..." />
+<button id="sendButton">Send Message via WebSocket</button>
+
+<!-- Button for API Call -->
+<button id="apiButton">Call API and Receive Response</button>
+
+<script>
+    // WebSocket connection to server
+    var socket = new WebSocket('ws://localhost:8080/ws/notifications');
+
+    // Khi WebSocket kết nối thành công
+    socket.onopen = function(event) {
+        console.log('WebSocket is connected');
+        document.getElementById("messages").innerHTML += "<p><strong>Connection Established</strong></p>";
+    };
+
+    // Nhận thông điệp từ server qua WebSocket
+    socket.onmessage = function(event) {
+        console.log('Received message: ' + event.data);
+        var messageDiv = document.getElementById("messages");
+        messageDiv.innerHTML += "<p><strong>Received via WebSocket:</strong> " + event.data + "</p>";
+        messageDiv.scrollTop = messageDiv.scrollHeight; // Cuộn đến cuối mỗi lần nhận thông báo
+    };
+
+    // Gửi thông điệp tới server khi bấm nút "Send"
+    document.getElementById("sendButton").onclick = function() {
+        var message = document.getElementById("sendMessage").value;
+        if (message) {
+            socket.send(message);
+            document.getElementById("sendMessage").value = ""; // Xóa nội dung đã nhập
+            document.getElementById("messages").innerHTML += "<p><strong>Sent via WebSocket:</strong> " + message + "</p>";
+        }
+    };
+
+    // Khi WebSocket đóng kết nối
+    socket.onclose = function(event) {
+        console.log('WebSocket connection closed');
+        document.getElementById("messages").innerHTML += "<p><strong>Connection closed</strong></p>";
+    };
+
+    // Khi có lỗi trong kết nối
+    socket.onerror = function(error) {
+        console.log('WebSocket Error: ' + error);
+        document.getElementById("messages").innerHTML += "<p><strong>Error:</strong> " + error + "</p>";
+    };
+
+    // Gọi API khi bấm nút "Call API and Receive Response"
+    document.getElementById("apiButton").onclick = function() {
+        // Gửi yêu cầu API tới backend
+        fetch('http://localhost:8080/api/notifications', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())  // Giả sử server trả về JSON
+            .then(data => {
+                console.log('Received response from API: ', data);
+                // Hiển thị dữ liệu nhận được từ API
+                var messageDiv = document.getElementById("messages");
+                messageDiv.innerHTML += "<p><strong>API Response:</strong> " + JSON.stringify(data) + "</p>";
+                messageDiv.scrollTop = messageDiv.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error calling API:', error);
+                document.getElementById("messages").innerHTML += "<p><strong>API Error:</strong> " + error + "</p>";
+            });
+    };
+</script>
+</body>
+</html>

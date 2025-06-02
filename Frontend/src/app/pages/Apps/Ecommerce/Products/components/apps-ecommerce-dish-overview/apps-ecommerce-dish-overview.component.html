@@ -1,0 +1,160 @@
+<app-page-title [pageTitle]="'Ecommerce'" [Title]="'Tổng quát nhà hàng'"></app-page-title>
+
+<div class="grid grid-cols-12 gap-x-5">
+    <div class="col-span-12 lg:col-span-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="flex items-center mb-5">
+                    <p class="grow">
+                        <span class="badge badge-sub-gray">
+                            <lucide-angular name="Heart" class="inline-block mr-1 text-red-500 size-4 fill-red-500"></lucide-angular>
+                            Sản phẩm được yêu thích
+                        </span>
+                    </p>
+                </div>
+
+                <h4 class="mb-3">{{ this.dish?.dishName }}</h4>
+
+                <div class="flex items-center mb-5">
+                    <p class=" me-2">123 Lượt bình luận</p>
+                    <p class="">1234 Đã bán</p>
+                </div>
+                <p class="mb-1 text-gray-500 dark:text-dark-500">Nhà hàng: {{this.dish.restaurant}}</p>
+              <h4 class="flex items-center gap-2 mt-3">
+                ${{dish.dishSalePrice * count}}
+              </h4>
+
+              <div class="my-5">
+                <div class="flex items-center w-32 p-1 text-center border border-gray-200 rounded-md dark:border-dark-800">
+                  <button class="flex items-center justify-center transition duration-200 ease-linear rounded-md text-primary-500 minus size-8 shrink-0 bg-primary-500/20 hover:text-primary-700" (click)="decreaseCount()">
+                    <lucide-angular class="size-4" name="minus"></lucide-angular>
+                  </button>
+                  <input type="text" class="h-8 p-0 text-center border-0 rounded-none form-input" readonly [value]="count">
+                  <button class="flex items-center justify-center transition duration-200 ease-linear rounded-md text-primary-500 plus size-8 shrink-0 bg-primary-500/20 hover:text-primary-700" (click)="increaseCount()">
+                    <lucide-angular class="size-4" name="plus"></lucide-angular>
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 mb-5">
+                <button type="button" class="btn btn-red w-36" (click)="addToCart(this.dish,count);goToCheckout()">Mua ngay</button>
+                <button type="button" class="btn btn-sub-gray w-50" (click)="addToCart(this.dish,count)">Thêm vào giỏ hàng</button>
+              </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 mb-5" *ngIf="dishes.length > 0">
+          <h6 class="grow">Sản phẩm cùng nhà hàng</h6>
+          <div id="deleteModal" class="modal" *ngIf="showDeleteModal">
+            <div class="modal-wrap modal-xs modal-center">
+              <div class="text-center modal-content p-7">
+                <div class="flex items-center justify-center mx-auto mb-4 text-red-500 rounded-full bg-red-500/10 size-14 backdrop-blur-xl">
+                  <lucide-angular name="trash-2" class="size-5"></lucide-angular>
+                </div>
+                <h5 class="mb-4">Bạn chỉ có thể chọn món cùng nhà hàng. Bạn có muốn xóa các món ăn trước khỏi giỏ hàng không?</h5>
+                <div class="flex items-center justify-center gap-2">
+                  <button class="btn btn-red" (click)="closeaDeletModal(true)">Xóa</button>
+                  <button class="btn link link-primary" (click)="closeaDeletModal()">Hủy</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card" *ngIf="dishes.length > 0">
+            <div class="card-header">
+                <div class="flex flex-wrap items-center gap-5">
+                  <ul class="flex items-center gap-2 overflow-x-auto">
+                    <li class = "cursor-pointer">
+                      <a
+                        (click)="getDishesByType('ALL')"
+                        class=" whitespace-nowrap relative block px-4 py-2 font-medium text-center transition duration-200 ease-linear rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-dark-50"
+                        [ngClass]="{'bg-gray-100 text-gray-900 dark:bg-dark-850 dark:text-dark-50': selectedCategoryIndex === null}"
+                      >
+                        <span class="align-middle">Tất cả</span>
+                      </a>
+
+                    </li>
+                    <li *ngFor="let category of this.dishCategory; let i = index"  class="cursor-pointer">
+                      <a
+                        (click)="selectedCategoryIndex = i"
+                        (click)="getDishesByType(category)"
+                        class="whitespace-nowrap relative block px-4 py-2 font-medium text-center transition duration-200 ease-linear rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-dark-50"
+                        [ngClass]="{'bg-gray-100 text-gray-900 dark:bg-dark-850 dark:text-dark-50': selectedCategoryIndex === i}"
+                      >
+                        <span class="align-middle">{{ category }}</span>
+                      </a>
+                    </li>
+
+                  </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="">
+                        <table class="table flush whitespace-nowrap">
+                            <tbody>
+                                <ng-container *ngFor="let dish of displayDish; let i = index">
+                                    <tr>
+                                        <td class="align-top cell1" >
+                                          <img [src]="dish.dishImageUrl" alt="" class="rounded-md shrink-0 size-20" (click)="getDetails(dish.dishId)"  (error)="onDishImageError($event)">
+                                        </td>
+                                        <td>
+                                            <div class="" (click)="getDetails(dish.dishId)">
+                                                <div class="gap-2 mb-3">
+                                                    <div class="text-yellow-500">
+                                                        <ng-container *ngFor="let iStar of [1, 2, 3, 4, 5]">
+                                                            <i [ngClass]="getStarClass(4.5, iStar)"></i>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+                                                <h6 class="mb-1">{{dish.dishName}}</h6>
+                                                <p class="text-gray-500 whitespace-normal dark:text-dark-500">{{dish.dishSalePrice}}đ</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                          <button (click)="!addCartProductIds.includes(dish.dishId) ? addToCart(dish): removeFromCart(dish.dishId)" class="flex items-center justify-center align-right transition duration-200 ease-linear rounded-md text-primary-500 minus size-8 shrink-0 bg-primary-500/20 hover:text-primary-700">
+                                            @if (addCartProductIds.includes(dish.dishId)){
+                                              <lucide-angular class="size-4" name="minus"></lucide-angular>
+                                            } @else {
+                                              <lucide-angular class="size-4" name="plus"></lucide-angular>
+                                            }
+                                          </button>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                    <app-domix-pagination [currentPage]="currentPage" [totalPages]="totalPages" [showingStart]="showingStart" [showingEnd]="showingEnd" [totalResults]="dishShow.length" (pageChanged)="onPageChange($event)">
+                    </app-domix-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
+        <div class="sticky mb-5 top-24">
+            <div class="card">
+                <div class="card-body">
+                    <div class="bg-gray-100 dark:bg-dark-850">
+                        <div class="previewImages">
+                          <img class="resImg" src="{{dish.dishImageUrl}}"
+                               (error)="onImageError($event)"
+                               alt="Ảnh nhà hàng" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+          <div class="card">
+            <div class="flex flex-wrap items-center gap-3 card-body">
+              <div class="icon flex items-center justify-center border border-gray-200 rounded-full dark:border-dark-800 shrink-0 size-14">
+                <lucide-angular name="store" class="text-sky-500 fill-sky-500/10"></lucide-angular>
+              </div>
+              <div class="grow name">
+                <h6 class="mb-1"><a href="javascript: void(0);"><span class="align-middle">{{dish.restaurant}}</span>
+                  <lucide-angular name="badge-check" class="inline-block ml-1 size-4 text-sky-500 fill-sky-500/10"></lucide-angular></a></h6>
+                <p><i class="text-yellow-500 align-bottom ri-star-half-line"></i> 4.8</p>
+              </div>
+              <button class="btn btn-purple shrink-0" (click)="goToRestaurant()">Ghé thăm</button>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>

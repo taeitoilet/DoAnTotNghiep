@@ -1,0 +1,103 @@
+<div
+  class="relative flex items-center justify-center min-h-screen py-12 from-sky-100 dark:from-sky-500/15 ltr:bg-gradient-to-l rtl:bg-gradient-to-r via-green-50 dark:via-green-500/10 to-pink-50 dark:to-pink-500/10">
+  <div class="container">
+    <div class="grid grid-cols-12">
+      <div
+        class="col-span-12 mb-0 md:col-span-10 lg:col-span-6 xl:col-span-4 md:col-start-2 lg:col-start-4 xl:col-start-5 card">
+        <div class="md:p-10 card-body">
+          <div class="mb-5 text-center">
+            <a href="javascript: void(0);">
+              <img src="assets/images/main-logo.png" alt="" class="h-10 mx-auto dark:hidden">
+              <img src="../../../../assets/images/logo-white.png" alt="" class="hidden h-10 mx-auto dark:inline-block"></a>
+          </div>
+          <h4
+            class="mb-2 font-bold leading-relaxed text-center text-transparent drop-shadow-lg ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-primary-500 vie-purple-500 to-pink-500 bg-clip-text">
+            Tạo tài khoản mới</h4>
+          <p class="mb-5 text-center text-gray-500">Có tài khoản rồi ư? <a routerLink="/auth-signin-basic"
+              class="font-medium link link-primary">Bấm vào đây đăng nhập nào</a></p>
+          <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+            <div class="grid grid-cols-12 gap-4 mt-5">
+              <div class="col-span-12 md:col-span-6">
+                <label for="lastNameInput" class="form-label">Họ và tên</label>
+                <input type="text" id="lastNameInput" class="w-full form-input" placeholder="Nhập tên của bạn"
+                  formControlName="fullName">
+                <p *ngIf="validateField('fullName')" class="text-sm text-red-500">{{ getErrorMessage('fullName') }}</p>
+              </div>
+              <div class="col-span-12 md:col-span-6">
+                <label for="userNameInput" class="form-label">Tên đăng nhập</label>
+                <input type="text" id="userNameInput" class="w-full form-input" placeholder="Nhập tên đăng nhập"
+                  formControlName="userName">
+                <p *ngIf="validateField('userName')" class="text-sm text-red-500">{{ getErrorMessage('userName') }}</p>
+              </div>
+              <div class="col-span-12 md:col-span-6">
+                <label for="emailInput" class="form-label">Email</label>
+                <input type="email" id="emailInput" class="w-full form-input" placeholder="Nhập email"
+                  formControlName="email">
+                <p *ngIf="validateField('email')" class="text-sm text-red-500">{{ getErrorMessage('email') }}</p>
+              </div>
+              <div class="col-span-12 md:col-span-6">
+                <label for="emailInput" class="form-label">Số điện thoại</label>
+                <input type="email" id="emailInput" class="w-full form-input" placeholder="Nhập số điện thoại"
+                       formControlName="phone">
+                <p *ngIf="validateField('phone')" class="text-sm text-red-500">{{ getErrorMessage('phone') }}</p>
+              </div>
+              <div class="col-span-12">
+                <div>
+                  <label for="passwordInput" class="form-label">Mật khẩu</label>
+                  <div class="relative">
+                    <input [type]="showPassword ? 'text' : 'password'" id="passwordInput"
+                      class="ltr:pr-8 rtl:pl-8 form-input" placeholder="Nhập mật khẩu" formControlName="password">
+                    <button type="button" (click)="showPassword = !showPassword"
+                      class="absolute inset-y-0 flex items-center text-gray-500 ltr:right-3 rtl:left-3 focus:outline-none">
+                      <lucide-angular name="Eye" *ngIf="showPassword" class="size-5"></lucide-angular>
+                      <lucide-angular name="EyeOff" *ngIf="!showPassword" class="size-5"></lucide-angular>
+                    </button>
+                  </div>
+                  <p *ngIf="validateField('password')" class="text-sm text-red-500">{{ getErrorMessage('password') }}
+                  </p>
+                </div>
+              </div>
+              <div class="col-span-12">
+                <div>
+                  <label for="confirmPasswordInput" class="form-label">Nhập lại mật khẩu</label>
+                  <div class="relative">
+                    <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPasswordInput"
+                      class="ltr:pr-8 rtl:pl-8 form-input" placeholder="Nhập lại mật khẩu"
+                      formControlName="confirmPassword">
+                    <button type="button" (click)="showConfirmPassword = !showConfirmPassword"
+                      class="absolute inset-y-0 flex items-center text-gray-500 ltr:right-3 rtl:left-3 focus:outline-none">
+                      <lucide-angular name="Eye" *ngIf="showConfirmPassword" class="size-5"></lucide-angular>
+                      <lucide-angular name="EyeOff" *ngIf="!showConfirmPassword" class="size-5"></lucide-angular>
+                    </button>
+                  </div>
+                  <p *ngIf="validateField('confirmPassword')" class="text-sm text-red-500">
+                    {{ getErrorMessage('confirmPassword') }}</p>
+                </div>
+              </div>
+              <div class="col-span-12">
+                <div class="items-center input-check-group grow">
+                  <input id="checkboxBasic1" class="shrink-0 align-middle" type="checkbox" formControlName="terms">
+                  <label for="checkboxBasic1" class="leading-normal input-check-label">Bằng việc tạo tài khoản, bạn đồng ý với tất cả các điều khoản, điều kiện và chính sách của chúng tôi.</label>
+                </div>
+<!--                <p *ngIf="validateField('terms')" class="text-sm text-red-500">{{ getErrorMessage('terms') }}</p>-->
+              </div>
+              <div class="col-span-12">
+                <button type="submit" class="w-full btn btn-primary disabled:cursor-not-allowed disabled:opacity-50" [disabled]="!signUpForm.valid">Đăng ký</button>
+              </div>
+            </div>
+          </form>
+          <div
+            class="relative my-5 text-center text-gray-500 dark:text-dark-500 before:absolute before:border-gray-200 dark:before:border-dark-800 before:border-dashed before:w-full ltr:before:left-0 rtl:before:right-0 before:top-2.5 before:border-b">
+            <p class="relative inline-block px-2 bg-white dark:bg-dark-900">Hoặc</p>
+          </div>
+
+          <div class="space-y-2">
+            <button type="button"
+              class="w-full border-gray-200 dark:border-dark-800 btn hover:bg-gray-50 dark:hover:bg-dark-850 hover:text-primary-500"><img
+                src="assets/images/others/google.png" alt="" class="inline-block h-4 ltr:mr-1 rtl:ml-1"> Đăng nhập bằng Google</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

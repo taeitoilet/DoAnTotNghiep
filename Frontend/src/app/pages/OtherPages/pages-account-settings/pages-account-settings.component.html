@@ -1,0 +1,115 @@
+<div class="relative mb-6">
+  <div class="relative overflow-hidden rounded-md h-44 bg-primary-500/10">
+    <div
+      class="border-[60px] border-t-primary-500 border-l-primary-500 absolute opacity-10 -top-2 left-0 rotate-45 size-96">
+    </div>
+    <div class="border-[60px] border-green-500 absolute opacity-10 top-20 left-8 rotate-45 size-80"></div>
+    <div class="border-[60px] border-pink-500 absolute opacity-10 top-36 left-28 rotate-45 size-40"></div>
+  </div>
+  <div class="text-center">
+    <div class="relative inline-block mx-auto">
+      <div class="relative p-1 rounded-full bg-gradient-to-tr from-primary-300 via-red-300 to-green-300 -mt-14">
+        <img [src]="this.user?.userAvatarUrl || 'assets/images/avatar/user-78.png'" alt=""
+             class="mx-auto border-4 border-white rounded-full dark:border-dark-900 size-28">
+      </div>
+      <div
+        class="absolute border-2 border-white dark:border-dark-900 rounded-full size-4 bg-green-500 bottom-2.5 ltr:right-2.5 rtl:left-2.5">
+      </div>
+    </div>
+    <h5 class="mt-2 mb-1">{{this.user?.username}}
+      <lucide-angular name="BadgeCheck" class="inline-block text-primary-500 fill-primary-500/20 size-5">
+      </lucide-angular>
+    </h5>
+    <ul class="flex flex-wrap items-center justify-center gap-2 text-gray-500 dark:text-dark-500 text-14">
+      <li>
+        <lucide-angular name="Building2" class="inline-block ltr:mr-1 rtl:ml-1 size-4"></lucide-angular><span
+          class="align-middle">{{this.user?.roles?.[0]?.roleName}}</span>
+      </li>
+      <li>
+        <lucide-angular name="MapPin" class="inline-block ltr:mr-1 rtl:ml-1 size-4"></lucide-angular> <span
+          class="align-middle">Hà Nội</span>
+      </li>
+      <li>
+        <lucide-angular name="ShieldCheck" class="inline-block ltr:mr-1 rtl:ml-1 size-4"></lucide-angular> <span
+          class="align-middle">{{this.user?.userCreatedAt | date : 'dd-MM-yyyy'}}</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="mt-5 card">
+  <div class="card-body">
+    <div class="grid grid-cols-12 gap-3">
+      <div class="col-span-12 xl:col-span-3">
+        <h6 class="card-title">Chi tiết tài khoản</h6>
+      </div>
+
+      <div class="col-span-12 xl:col-span-9">
+        <form  [formGroup]="userForm">
+          <div class="grid grid-cols-12 gap-5">
+            <div class="col-span-12">
+              <div>
+                <div class="shrink-0">
+                  @if (this.previewUrl){
+                    <img class="object-cover rounded-md size-20" [src]="previewUrl"
+                         alt="Current profile photo" />
+                  } @else {
+                    <img class="object-cover rounded-md size-20" [src]="this.user?.userAvatarUrl || 'assets/images/avatar/user-78.png'"
+                         alt="Current profile photo" />
+                  }
+
+                </div>
+                <label class="block mt-4">
+                  <span class="sr-only">Chọn ảnh đại diện</span>
+                  <input type="file" (change)="onFileSelected($event)"
+                    class="hidden" />
+                  <span class="btn btn-sub-primary">
+                    <lucide-angular name="Upload" class="inline-block size-4 me-1"></lucide-angular> <span
+                      class="align-middle">Tải ảnh đại diện</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-6">
+              <label for="fullName" class="form-label">Họ tên</label>
+              <input type="text" id="fullName" class="form-input" value="{{this.user?.userFullName}}"
+                placeholder="Hãy điền họ tên của bạn" formControlName="fullName">
+              <span *ngIf="userForm.get('fullName')?.invalid && userForm.get('fullName')?.touched" class="text-sm text-red-500">Vui lòng nhập đầy đủ!</span>
+            </div>
+            <div class="col-span-12 md:col-span-6 lg:col-span-4">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" id="email" class="form-input"
+                placeholder="example@SRBThemes.com" formControlName="email">
+              <span *ngIf="userForm.get('email')?.hasError('required')" class="text-sm text-red-500">Vui lòng nhập đầy đủ!</span>
+              <span *ngIf="userForm.get('email')?.hasError('pattern')" class="text-sm text-red-500">Email không đúng định dạng.</span>
+
+            </div>
+
+
+            <div class="col-span-12 md:col-span-6 lg:col-span-4">
+              <label for="phone" class="form-label">Số điện thoại</label>
+              <input type="text" id="phone" class="form-input"
+                placeholder="+(00) 00000 00000" formControlName="phone">
+              <span *ngIf="userForm.get('phone')?.hasError('required')" class="text-red-500">Vui lòng nhập đầy đủ!</span>
+              <span *ngIf="userForm.get('phone')?.hasError('pattern')" class="text-red-500">Số điện thoại không đúng định dạng.</span>
+            </div>
+
+            <div class="col-span-12 md:col-span-6 lg:col-span-4">
+              <label class="form-label">Địa chỉ</label>
+              <input type="text"  class="form-input" value="" placeholder="Nhập địa chỉ">
+            </div>
+
+            <div class="col-span-12 text-right">
+              <button type="submit" class="btn btn-primary" (click)="this.onUpdate()">Lưu thông tin</button>
+            </div>
+
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,90 @@
+<app-page-title [Title]="'Nhà hàng'" [pageTitle]="'Trang chủ'"></app-page-title>
+
+<div class="flex flex-wrap items-center gap-5 mb-5">
+  <div class="grow">
+    <p class="text-gray-500 dark:text-dark-500">Nhà hàng gần bạn</p>
+  </div>
+  <div class="flex gap-2 shrink-0">
+    <div class="relative group/form">
+      <input type="email"
+             class="ltr:pl-9 rtl:pr-9 form-input ltr:group-[&.right]/form:pr-9 rtl:group-[&.right]/form:pl-9 ltr:group-[&.right]/form:pl-4 rtl:group-[&.right]/form:pr-4"
+             placeholder="Tìm kiếm theo tên nhà hàng" [(ngModel)]="searchRes" (keydown.enter)="getActiveRes()" (blur)="getActiveRes()">
+      <span
+        class="absolute inset-y-0 flex items-center text-gray-500 dark:text-dark-500 ltr:left-3 rtl:right-3 ltr:group-[&.right]/form:right-3 rtl:group-[&.right]/form:left-3 ltr:group-[&.right]/form:left-auto rtl:group-[&.right]/form:right-auto focus:outline-none">
+          <lucide-angular name="Search" class="size-4"></lucide-angular>
+        </span>
+    </div>
+    <div class="dropdown" (click)="toggleDropdown()">
+      <button class="dropdown-btn btn-sub-gray rounded">
+        <lucide-angular name="map-pin" class="mr-1 size-4 inline-block"></lucide-angular>
+        {{ selectedProvince || 'City' }}
+      </button>
+      <ul class="dropdown-list rounded" *ngIf="isOpen === true">
+        <li *ngFor="let province of provinces"
+            (click)="selectProvince(province)" (click)="getActiveRes()">
+          {{ province }}
+        </li>
+      </ul>
+    </div>
+    <button type="button" class="relative btn btn-icon btn-sub-primary" (click)="goToCart()">
+      <lucide-angular name="ShoppingCart" class="size-5"></lucide-angular>
+      <span class="absolute border-2 border-white rounded-full dark:border-dark-900 badge badge-square badge-solid-primary -top-2 -right-2">{{addCartProductIds.length}}</span>
+    </button>
+    <button type="button" class="relative btn btn-icon btn-sub-red" (click)="goToWishlist()">
+      <lucide-angular name="heart" class="size-5"></lucide-angular>
+      <span class="absolute border-2 border-white rounded-full dark:border-dark-900 badge badge-square badge-solid-red -top-2 -right-2">{{wishListItemCount}}</span>
+    </button>
+  </div>
+</div>
+<div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5">
+    <ng-container *ngIf="displayedData.length > 0">
+      <ng-container *ngFor="let product of displayedData; let i = index">
+        <div class="card">
+          <div class="p-2 card-body">
+            <div class="relative p-5 bg-opacity-15" [ngClass]="
+            i % 5 === 0 ? 'bg-primary-500' :
+            i % 5 === 1 ? 'bg-green-500' :
+            i % 5 === 2 ? 'bg-yellow-500' :
+            i % 5 === 3 ? 'bg-red-500' :
+            'bg-gray-500'">
+              <img class="cursor-pointer" src="assets/images/42877472-restaurant-icon.jpg" alt=""  (click)="goToDetail(product.restaurantId)">
+            </div>
+            <div class="p-1 mt-2 p-1 mt-2 flex flex-col justify-between card-content">
+              <h5 class = "mb-2 line-clamp-2 cursor-pointer"  (click)="goToDetail(product.restaurantId)">{{product.restaurantName}}</h5>
+              <p class = "mb-2 line-clamp-2"><a routerLink="/apps-ecommerce-product-overview">{{product.restaurantAddress}}</a></p>
+              <p *ngIf="product.distance" class="text-gray-500 dark:text-dark-500 mb-0 mt-auto">{{ product.distance | number: '1.2-2' }}km</p>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+  <ng-container *ngIf="displayedData.length == 0">
+    <div class="!p-8">
+      <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" class="mx-auto size-12" viewBox="0 0 48 48">
+        <linearGradient id="SVGID_1__h35ynqzIJzH4_gr1" x1="34.598" x2="15.982" y1="15.982" y2="34.598" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#60e8fe"></stop>
+          <stop offset=".033" stop-color="#6ae9fe"></stop>
+          <stop offset=".197" stop-color="#97f0fe"></stop>
+          <stop offset=".362" stop-color="#bdf5ff"></stop>
+          <stop offset=".525" stop-color="#dafaff"></stop>
+          <stop offset=".687" stop-color="#eefdff"></stop>
+          <stop offset=".846" stop-color="#fbfeff"></stop>
+          <stop offset="1" stop-color="#fff"></stop>
+        </linearGradient>
+        <path fill="url(#SVGID_1__h35ynqzIJzH4_gr1)" d="M40.036,33.826L31.68,25.6c0.847-1.739,1.335-3.684,1.335-5.748c0-7.27-5.894-13.164-13.164-13.164	S6.688,12.582,6.688,19.852c0,7.27,5.894,13.164,13.164,13.164c2.056,0,3.995-0.485,5.728-1.326l3.914,4.015l4.331,4.331	c1.715,1.715,4.496,1.715,6.211,0C41.751,38.321,41.751,35.541,40.036,33.826z">
+        </path>
+        <path fill="none" stroke="#10cfe3" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3" d="M31.95,25.739l8.086,8.086c1.715,1.715,1.715,4.496,0,6.211l0,0c-1.715,1.715-4.496,1.715-6.211,0	l-4.331-4.331">
+        </path>
+        <path fill="none" stroke="#10cfe3" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3" d="M7.525,24.511c-1.771-4.694-0.767-10.196,3.011-13.975c3.847-3.847,9.48-4.817,14.228-2.912">
+        </path>
+        <path fill="none" stroke="#10cfe3" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="3" d="M30.856,12.603c3.376,5.114,2.814,12.063-1.688,16.565c-4.858,4.858-12.565,5.129-17.741,0.814"></path>
+      </svg>
+      <p class="mt-2 text-center text-gray-500 dark:text-dark-500">Không tìm thấy nhà hàng theo yêu cầu tìm kiếm </p>
+    </div>
+  </ng-container>
+
+  <app-domix-pagination [currentPage]="currentPage" [totalPages]="totalPages" [showingStart]="showingStart" [showingEnd]="showingEnd" [totalResults]="this.totalItems" (pageChanged)="onPageChange($event)">
+  </app-domix-pagination>
+</div>

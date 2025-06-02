@@ -1,0 +1,52 @@
+package org.example.foodee_service.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class ResTable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long resTableId;
+
+    private String resTableName;
+
+    private Integer resTableSeats;
+
+    private Boolean resTableIsAvailable;
+
+    private LocalDateTime resTableCreatedAt;
+
+    private String resTableCreatedBy;
+
+    private LocalDateTime resTableUpdatedAt;
+
+    private String resTableUpdatedBy;
+
+    @ManyToOne
+    private Restaurant restaurant;
+
+    @PrePersist
+    public void prePersist() {
+        resTableCreatedAt = LocalDateTime.now();
+        resTableCreatedBy = "SYSTEM";
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        resTableUpdatedAt = LocalDateTime.now();
+        resTableUpdatedBy = "SYSTEM";
+    }
+}
+

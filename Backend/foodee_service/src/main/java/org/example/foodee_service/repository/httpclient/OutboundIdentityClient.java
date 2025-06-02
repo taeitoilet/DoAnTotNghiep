@@ -1,0 +1,15 @@
+package org.example.foodee_service.repository.httpclient;
+
+
+import feign.QueryMap;
+import org.example.foodee_service.dto.request.authentication_request.ExchangeTokenRequest;
+import org.example.foodee_service.dto.response.authenticationResponse.ExchangeTokenResponse;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@FeignClient(name = "outbound-identity", url = "https://oauth2.googleapis.com")
+public interface OutboundIdentityClient {
+    @PostMapping(value = "/token", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    ExchangeTokenResponse exchangeToken(@QueryMap ExchangeTokenRequest request);
+}

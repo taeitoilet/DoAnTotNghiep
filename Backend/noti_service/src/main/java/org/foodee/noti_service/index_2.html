@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Test - Send Notifications</title>
+    <style>
+        /* Sử dụng font hệ thống của Apple */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+            background-color: #F2F2F7;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Container chính */
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Tiêu đề */
+        h1 {
+            font-size: 28px;
+            color: #4A4A4A;
+            margin-bottom: 30px;
+        }
+
+        /* Input và nút */
+        input[type="text"], button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            font-size: 16px;
+            background-color: #F9F9F9;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus, button:hover {
+            border-color: #007AFF;
+            outline: none;
+        }
+
+        button {
+            background-color: #007AFF;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            border: none;
+        }
+
+        button:active {
+            background-color: #005BB5;
+        }
+
+        /* Hiển thị thông báo */
+        #messages {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            height: 300px;
+            overflow-y: scroll;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        /* Styling cho thông báo */
+        #messages p {
+            word-wrap: break-word;
+            margin: 8px 0;
+        }
+
+        /* Hiệu ứng hover cho nút */
+        button:hover {
+            background-color: #0066cc;
+        }
+
+        /* Cải tiến giao diện cho các trường hợp error hoặc thành công */
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SSE Test - Send Notifications</h1>
+
+    <div>
+        <input type="text" id="userIdInput" placeholder="Enter your userId" />
+        <button id="sendButton">Connect to SSE</button>
+        <button id="checkConnectionButton">Check Connection</button>
+    </div>
+
+    <div>
+        <input type="text" id="messageInput" placeholder="Enter message to send" />
+        <button id="sendMessageButton">Send Notification</button>
+    </div>
+
+    <div id="messages"></div>
+</div>
+
+<script>
+
+    var eventSource = new EventSource(`http://localhost:8080/api/notifications/subscribe?userId=123`);
+
+    eventSource.onmessage = (event) => {
+    };
+
+    eventSource.addEventListener('order-status', (event) => {
+        console.log("Received message:", event.data);
+
+        // Hiển thị thông báo nhận được
+        var messageDiv = document.getElementById("messages");
+        messageDiv.innerHTML += `<p><strong>Received:</strong> ${event.data}</p>`;
+        messageDiv.scrollTop = messageDiv.scrollHeight; // Cuộn xuống cuối khi có thông báo mới
+    });
+
+    // Kiểm tra khi kết nối mở thành công
+    eventSource.onopen = function() {
+        console.log("SSE connection opened");
+    };
+
+    // Xử lý sự kiện khi nhận thông điệp từ server qua SSE
+
+
+
+    // Xử lý sự kiện lỗi nếu có lỗi xảy ra trong kết nối SSE
+    eventSource.onerror = function(error) {
+        console.error("Error in SSE connection:", error);
+        document.getElementById("messages").innerHTML += "<p class='error'><strong>Error:</strong> " + error + "</p>";
+    };
+
+    // Đảm bảo khi kết nối SSE đóng hoặc có sự cố, xử lý thông báo
+    eventSource.onclose = function() {
+        console.log("SSE connection closed");
+    };// To store the EventSource connection
+
+    // Khi bấm nút "Connect to SSE", client sẽ kết nối đến SSE
+    document.getElementById("sendButton").onclick = function() {
+        var userId = document.getElementById("userIdInput").value;
+        if (userId) {
+            connectToSSE(userId);
+        } else {
+            alert("Please enter a valid userId.");
+        }
+    };
+
+    // Khi bấm nút "Send Notification", gửi message thông qua API
+    document.getElementById("sendMessageButton").onclick = function() {
+        var userId = document.getElementById("userIdInput").value;
+        var message = document.getElementById("messageInput").value;
+
+        if (userId && message) {
+            sendNotification(userId, message);
+        } else {
+            alert("Please enter both userId and message.");
+        }
+
+        if (eventSource.readyState === EventSource.CLOSED) {
+            eventSource = new EventSource(`http://localhost:8080/api/notifications/subscribe?userId=123`);
+
+            eventSource.onmessage = (event) => {
+                console.log("ReadyState:", eventSource.readyState);
+                console.log("Received message:", event);
+
+                var messageDiv = document.getElementById("messages");
+                messageDiv.innerHTML += `<p><strong>Received:</strong> ${event.data}</p>`;
+                messageDiv.scrollTop = messageDiv.scrollHeight;
+            }
+        }
+    };
+
+    // Hàm để kết nối tới SSE
+    function connectToSSE(userId) {
+    //     console.log("Connecting to SSE with userId:", userId);
+    //
+    //     // Kết nối đến SSE endpoint trên backend
+    //     eventSource = new EventSource(`http://localhost:8080/api/notifications/subscribe?userId=${userId}`);
+    //
+    //     eventSource.addEventListener('welcome', (event) => {
+    //         console.log("Received welcome message:", event.data);
+    //     });
+    //
+    //     // Xử lý sự kiện khi nhận thông điệp từ server qua SSE
+    //     eventSource.onmessage = (event) => {
+    //         console.log("Received message:", event.data);
+    //
+    //         // Hiển thị thông báo nhận được
+    //         var messageDiv = document.getElementById("messages");
+    //         messageDiv.innerHTML += `<p><strong>Received:</strong> ${event.data}</p>`;
+    //         messageDiv.scrollTop = messageDiv.scrollHeight; // Cuộn xuống cuối khi có thông báo mới
+    //     };
+    //
+    //
+    //     // Xử lý sự kiện lỗi nếu có lỗi xảy ra trong kết nối SSE
+    //     eventSource.onerror = function(error) {
+    //         console.error("Error in SSE connection:", error);
+    //         document.getElementById("messages").innerHTML += "<p class='error'><strong>Error:</strong> " + error + "</p>";
+    //     };
+    //
+    //     // Đảm bảo khi kết nối SSE đóng hoặc có sự cố, xử lý thông báo
+    //     eventSource.onclose = function() {
+    //         console.log("SSE connection closed");
+    //     };
+    }
+
+    // Gửi thông báo tới backend API
+    function sendNotification(userId, message) {
+        fetch(`http://localhost:8080/api/notifications?userId=${userId}&message=${message}`, {
+            method: 'GET',
+        })
+            .then(response => response.json())  // Phản hồi là JSON
+            .then(data => {
+                console.log("Notification sent:", data);
+                // Hiển thị thông báo đã gửi vào phần hiển thị
+                document.getElementById("messages").innerHTML += `<p class='success'><strong>Sent:</strong> ${message}</p>`;
+            })
+            .catch(error => {
+                console.error("Error sending notification:", error);
+                document.getElementById("messages").innerHTML += "<p class='error'><strong>Error sending notification:</strong> " + error + "</p>";
+            });
+    }
+</script>
+
+</body>
+</html>

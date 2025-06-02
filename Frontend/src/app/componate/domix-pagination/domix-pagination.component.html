@@ -1,0 +1,30 @@
+<div class="grid grid-cols-12 gap-5 my-5">
+    <div class="flex col-span-12 gap-2 md:col-span-6">
+        <p class="px-2 text-gray-500 dark:text-dark-500" *ngIf="totalResults > 0">
+            Hiển thị <b>{{ showingStart }}</b> - <b>{{ totalResults < 10 ? totalResults : showingEnd }}</b> trong <b>{{ totalResults }}</b> bản ghi
+        </p>
+    </div>
+    <div class="col-span-12 md:col-span-6">
+        <div class="flex justify-center md:justify-end pagination pagination-primary">
+            <button (click)="prevPage()" [disabled]="currentPage === 1" class="pagination-pre">
+                <lucide-angular name="ChevronLeft" class="mr-1 ltr:inline-block rtl:hidden !:size-4"></lucide-angular>
+                <lucide-angular name="chevron-right" class="ml-1 rtl:inline-block ltr:hidden !:size-4"></lucide-angular>
+            </button>
+          <ng-container *ngFor="let page of visiblePages">
+            <button
+              *ngIf="page !== -1"
+              (click)="gotoPage(page)"
+              [class.active]="currentPage === page"
+              class="pagination-item">
+              {{ page }}
+            </button>
+            <span *ngIf="page === -1" class="pagination-ellipsis">...</span>
+          </ng-container>
+
+          <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="pagination-next">
+              <lucide-angular name="chevron-right" class="ml-1 ltr:inline-block rtl:hidden !:size-4"></lucide-angular>
+              <lucide-angular name="ChevronLeft" class="mr-1 rtl:inline-block ltr:hidden !:size-4"></lucide-angular>
+          </button>
+        </div>
+    </div>
+</div>

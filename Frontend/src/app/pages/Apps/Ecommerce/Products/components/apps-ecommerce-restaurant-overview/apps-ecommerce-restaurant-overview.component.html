@@ -1,0 +1,268 @@
+<app-page-title [pageTitle]="'Ecommerce'" [Title]="'Tổng quát nhà hàng'"></app-page-title>
+
+<div class="grid grid-cols-12 gap-x-5">
+    <div class="col-span-12 lg:col-span-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="flex items-center mb-5">
+                    <p class="grow">
+                        <span class="badge badge-sub-gray">
+                            <lucide-angular name="Heart" class="inline-block mr-1 text-red-500 size-4 fill-red-500"></lucide-angular>
+                            Nhà hàng được yêu thích
+                        </span>
+                    </p>
+                  <p *ngIf="restaurant.restaurantIsBooking" class="ms-auto cursor-pointer" (click)="bookingButton = true">
+                        <span class="badge badge-sub-yellow">
+                            <lucide-angular name="calendar-clock" class="inline-block mr-1 text-yellow-500  size-7"></lucide-angular>
+                            Đặt bàn
+                        </span>
+                  </p>
+                </div>
+
+                <h4 class="mb-3">{{ this.restaurant?.restaurantName }}</h4>
+
+                <div class="flex items-center mb-5">
+                    <p class= "me-2">{{ this.restaurant?.restaurantAvgRatingText }} <i class="text-yellow-500 align-bottom ri-star-half-line"></i></p>
+                    <p class=" me-2">123 Lượt bình luận</p>
+                    <p class="">1234 Đã bán</p>
+                </div>
+
+                <h6 class="mb-1">{{this.restaurant?.categoryName}}</h6>
+                <p class="mb-1 text-gray-500 dark:text-dark-500">Địa chỉ: {{this.restaurant?.restaurantAddress}}</p>
+                @if (this.restaurant?.restaurantPhone) {
+                  <p class="mb-4 text-gray-500 dark:text-dark-500">SĐT: {{this.restaurant?.restaurantPhone}}</p>
+                }
+            </div>
+        </div>
+
+        <div id="deleteModal" class="modal" *ngIf="showDeleteModal">
+          <div class="modal-wrap modal-xs modal-center">
+            <div class="text-center modal-content p-7">
+              <div class="flex items-center justify-center mx-auto mb-4 text-red-500 rounded-full bg-red-500/10 size-14 backdrop-blur-xl">
+                <lucide-angular name="trash-2" class="size-5"></lucide-angular>
+              </div>
+              <h5 class="mb-4">Bạn chỉ có thể chọn món cùng nhà hàng. Bạn có muốn xóa các món ăn trước khỏi giỏ hàng không?</h5>
+              <div class="flex items-center justify-center gap-2">
+                <button class="btn btn-red" (click)="closeaDeletModal(true)">Xóa</button>
+                <button class="btn link link-primary" (click)="closeaDeletModal()">Hủy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <div id="bookingModal" class="modal" *ngIf="bookingButton">
+        <div class="modal-wrap modal-lg modal-center">
+          <div class=" modal-content p-7">
+            <h5 class="mb-4">Phiếu đặt bàn</h5>
+            <form [formGroup]="bookingForm" >
+              <div class="grid grid-cols-12 gap-5">
+                <!-- Họ tên -->
+                <div class="col-span-12 md:col-span-6">
+                  <label for="lastName" class="form-label">Họ tên</label>
+                  <input type="text" id="lastName" class="form-input" placeholder="Nhập tên của bạn" formControlName="lastName" />
+                  <span *ngIf="bookingForm.get('lastName')?.invalid && bookingForm.get('lastName')?.touched" class="text-red-500">Hãy nhập họ tên!</span>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="col-span-12 md:col-span-6">
+                  <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                  <input type="tel" id="phoneNumber" class="form-input" placeholder="1234567890" formControlName="phone" />
+                  <span *ngIf="bookingForm.get('phone')?.invalid && bookingForm.get('phone')?.touched" class="text-red-500">Số điện thoại không hợp lệ</span>
+                </div>
+
+                <div class="col-span-12 md:col-span-6">
+                  <label  class="block mb-2 text-sm font-medium text-gray-700">Ngày</label>
+                  <input
+                    type="date"
+                    class="border p-2 rounded w-full bg-gray-100 text-gray-600 cursor-not-allowed"
+
+                    [value]="today"
+                    disabled
+                  />
+                </div>
+                <!-- Ngày & giờ đặt bàn -->
+                <div class="col-span-12 md:col-span-6">
+                  <label  class="block mb-2 text-sm font-medium text-gray-700">Thời gian</label>
+                  <select formControlName="time" class="custom-select" >
+                    <option  value="" disabled selected>Chọn giờ</option>
+                    <option *ngFor="let time of hoursOptions" [value]="time">{{ time }}</option>
+                  </select>
+                  <span
+                    *ngIf="bookingForm.get('time')?.invalid && bookingForm.get('time')?.touched"
+                    class="mt-1 text-sm text-red-600"
+                  >
+                    Hãy chọn thời gian hợp lệ!
+                  </span>
+                </div>
+
+                <!-- Số người -->
+                <div class="col-span-12 md:col-span-6">
+                  <label for="guestCount" class="form-label">Số người</label>
+                  <input
+                    type="number"
+                    id="guestCount"
+                    class="form-input"
+                    placeholder="Nhập số lượng người"
+                    formControlName="guestCount"
+                    min="0"
+                  />
+                  <span *ngIf="bookingForm.get('guestCount')?.invalid && bookingForm.get('guestCount')?.touched" class="text-red-500">Hãy nhập số người!</span>
+                </div>
+                <div class="col-span-12">
+                  <label for="textareaInput2" class="form-label">Ghi chú</label>
+                  <textarea name="textareaInput2" id="textareaInput2" rows="3" class="h-auto form-input" placeholder="Nhập ghi chú" formControlName="note"></textarea>
+                </div>
+                <!-- Nút -->
+                <div class="col-span-12">
+                  <div class="flex flex-wrap justify-end gap-2">
+                    <button type="button" class="btn btn-active-red" (click)="bookingButton = false; bookingForm.reset()">Hủy</button>
+                    <button type="submit" class="btn btn-primary" (click)="openConfirmModal()">Xác nhận</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div id="successModal" class="modal" *ngIf="showSuccessModal">
+        <div class="modal-wrap modal-xs modal-center">
+          <div class="text-center modal-content p-7">
+            <div class="flex items-center justify-center mx-auto mb-4 text-green-500 rounded-full bg-green-500/10 size-14 backdrop-blur-xl">
+              <lucide-angular name="circle-check-big" class="size-5"></lucide-angular>
+            </div>
+            <h5 class="mb-4 text-green-600 font-semibold">Đặt bàn thành công!</h5>
+            <p class="mb-4 text-sm text-gray-600">
+              Cảm ơn bạn đã đặt bàn. Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất để xác nhận.
+            </p>
+            <div class="flex items-center justify-center">
+              <button class="btn btn-primary" (click)="closeSuccessModal()">Đóng</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="confirmBookingModal" class="modal" *ngIf="showConfirmModal">
+        <div class="modal-wrap modal-xs modal-center">
+          <div class="text-center modal-content p-7">
+            <div class="flex items-center justify-center mx-auto mb-4 text-yellow-500 rounded-full bg-yellow-500/10 size-14 backdrop-blur-xl">
+              <lucide-angular name="badge-check" class="size-5"></lucide-angular>
+            </div>
+            <h5 class="mb-4 text-yellow-600 font-semibold">Xác nhận đặt bàn</h5>
+            <p class="mb-4 text-sm text-gray-600">
+              Bạn có chắc chắn muốn đặt bàn với thông tin đã nhập không?
+            </p>
+            <div class="flex items-center justify-center gap-2">
+              <button class="btn link link-primary" (click)="cancelConfirmModal()">Hủy</button>
+              <button class="btn btn-primary" (click)="confirmBooking()">Xác nhận</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" *ngIf="dishes.length > 0">
+            <div class="card-header">
+                <div class="flex flex-wrap items-center gap-5">
+                  <ul class="flex items-center gap-2 overflow-x-auto">
+                    <li class = "cursor-pointer">
+                      <a
+                        (click)="selectedCategoryIndex = null"
+                        (click)="getDishesByType('ALL')"
+                        class=" whitespace-nowrap relative block px-4 py-2 font-medium text-center transition duration-200 ease-linear rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-dark-50"
+                        [ngClass]="{'bg-gray-100 text-gray-900 dark:bg-dark-850 dark:text-dark-50': selectedCategoryIndex === null}"
+                      >
+                        <span class="align-middle">Tất cả</span>
+                      </a>
+
+                    </li>
+                    <li *ngFor="let category of this.dishCategory; let i = index"  class="cursor-pointer">
+                      <a
+                        (click)="selectedCategoryIndex = i"
+                        (click)="getDishesByType(category)"
+                        class="whitespace-nowrap relative block px-4 py-2 font-medium text-center transition duration-200 ease-linear rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-dark-50"
+                        [ngClass]="{'bg-gray-100 text-gray-900 dark:bg-dark-850 dark:text-dark-50': selectedCategoryIndex === i}"
+                      >
+                        <span class="align-middle">{{ category }}</span>
+                      </a>
+                    </li>
+
+                  </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="">
+                        <table class="table flush whitespace-nowrap">
+                            <tbody>
+                                <ng-container *ngFor="let dish of displayDish; let i = index">
+                                    <tr>
+                                        <td class="align-top cell1  cursor-pointer" (click)="goToDishDetail(dish.dishId)">
+                                          <img [src]="dish.dishImageUrl" alt="" class="rounded-md shrink-0 size-20" >
+                                        </td>
+                                        <td>
+                                            <div class=" cursor-pointer" (click)="goToDishDetail(dish.dishId)">
+                                                <div class="gap-2 mb-3">
+                                                    <div class="text-yellow-500">
+                                                        <ng-container *ngFor="let iStar of [1, 2, 3, 4, 5]">
+                                                            <i [ngClass]="getStarClass(4.5, iStar)"></i>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+                                                <h6 class="mb-1">{{dish.dishName}}</h6>
+                                                <p class="text-gray-500 whitespace-normal dark:text-dark-500">{{dish.dishSalePrice}}đ</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                          <button (click)="!addCartProductIds.includes(dish.dishId) ? addToCart(dish): removeFromCart(dish.dishId)" class="flex items-center justify-center align-right transition duration-200 ease-linear rounded-md text-primary-500 minus size-8 shrink-0 bg-primary-500/20 hover:text-primary-700">
+                                            @if (addCartProductIds.includes(dish.dishId)){
+                                              <lucide-angular class="size-4" name="minus"></lucide-angular>
+                                            } @else {
+                                              <lucide-angular class="size-4" name="plus"></lucide-angular>
+                                            }
+                                          </button>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                    <app-domix-pagination [currentPage]="currentPage" [totalPages]="totalPages" [showingStart]="showingStart" [showingEnd]="showingEnd" [totalResults]="dishShow.length" (pageChanged)="onPageChange($event)">
+                    </app-domix-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-span-12 lg:col-span-4">
+        <div class="sticky mb-5 top-24">
+            <div class="card">
+                <div class="card-body">
+                    <div class="bg-gray-100 dark:bg-dark-850">
+                        <div class="previewImages">
+                          <img class="resImg" src="http://localhost:8080{{this.restaurant?.restaurantPhotoUrl}}"
+                               (error)="onImageError($event)"
+                               alt="Ảnh nhà hàng" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 mb-5" *ngIf="dishes.length > 0">
+                <h6 class="grow">Sản phẩm bán chạy</h6>
+            </div>
+            <div class="card" *ngIf="dishes.length > 0">
+                <div class="card-body">
+                    <div class="relative p-5 bg-gray-100 dark:bg-dark-850">
+                        <a href="javascript: void(0);" class="absolute z-10 flex items-center justify-center bg-white rounded-full link link-red size-10 shrink-0 top-5 ltr:right-5 rtl:left-5"><i class="text-lg ri-heart-line"></i></a>
+                        <img class="dishImg" src="{{this.dish?.dishImageUrl}}" (error)="onDishImageError($event)">
+                    </div>
+                    <div class="mt-5">
+                        <h5 class="mb-2">{{ this.dish?.dishSalePrice }}đ</h5>
+                        <h6 class="mb-1"><a href="javascript: void(0);" class="text-current link link-primary">{{this.dish?.dishName}}</a></h6>
+                        <div class="flex gap-2 mt-4">
+                          <button (click)="!addCartProductIds.includes(dish.dishId) ? addToCart(dish): removeFromCart(dish.dishId)" type="button" class="w-full btn btn-primary">
+                            {{addCartProductIds.includes(dish.dishId)? 'Xóa khỏi giỏ': 'Thêm vào giỏ hàng'}} </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

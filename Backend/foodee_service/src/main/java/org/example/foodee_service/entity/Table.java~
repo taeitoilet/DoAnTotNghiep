@@ -1,0 +1,54 @@
+package org.example.foodee_service.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@jakarta.persistence.Table(name = "tables")
+public class Table {
+
+    @Id
+    @Column(name = "tbl_id")
+    private Long id;
+
+    @Column(name = "tbl_name")
+    private String name;
+    
+    @Column(name = "tbl_seats")
+    private Integer seats;
+    
+    @Column(name = "tbl_is_available")
+    private Boolean isAvailable;
+    
+    @Column(name = "tbl_created_at")
+    private LocalDateTime createdAt;
+    
+    @Column(name = "tbl_created_by")
+    private String createdBy;
+    
+    @Column(name = "tbl_updated_at")
+    private LocalDateTime updatedAt;
+    
+    @Column(name = "tbl_updated_by")
+    private String updatedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "tbl_restaurant_id")
+    private Restaurant restaurant;
+
+    @OneToMany(mappedBy = "table")
+    private Set<Booking> bookings;
+
+    // getters and setters
+}
+
